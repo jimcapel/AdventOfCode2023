@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -9,9 +10,12 @@ using namespace std;
 int main()
 {
     fstream file;
-    file.open("../inputTest.txt", ios::in);
+    file.open("../input.txt", ios::in);
 
     int total = 0;
+    std::map<int, int> m;
+
+    int cardIndex = 0;
 
     if (file.is_open())
     {
@@ -29,6 +33,15 @@ int main()
 
             bool gameString = false;
             bool elfString = false;
+
+            if (m.count(cardIndex))
+            {
+                m[cardIndex] = m[cardIndex] + 1;
+            }
+            else
+            {
+                m[cardIndex] = 1;
+            }
 
             for (int i = 0; i < current.length(); i++)
             {
@@ -69,28 +82,40 @@ int main()
                 }
             }
 
-            int winningCount = 0;
-
             for (int x : elfsNumbers)
             {
                 if (std::count(winningNumbers.begin(), winningNumbers.end(), x))
                 {
-                    // cardTotal = cardTotal == 0 ? 1 : cardTotal * 2;
-                    winningCount++;
+                    cardTotal++;
                 }
             }
-            cout << winningCount << endl;
 
-            total += winningCount;
+            int currentCardTotal = m.count(cardIndex) ? m[cardIndex] : 1;
 
-            if (winningCount)
+            for (int i = 1; i <= cardTotal; i++)
             {
-                total += 1;
+                int index = cardIndex + i;
+
+                if (m.count(index))
+                {
+                    m[index] = m[index] + (1 * currentCardTotal);
+                }
+                else
+                {
+                    m[index] = (1 * currentCardTotal);
+                }
             }
+
+            cardIndex++;
         }
     }
 
     file.close();
+
+    for (int i = 0; i < cardIndex; i++)
+    {
+        total += m[i];
+    }
 
     std::cout << total << endl;
 

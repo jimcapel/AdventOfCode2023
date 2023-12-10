@@ -15,16 +15,19 @@ int main()
 
     int total = 0;
 
-    if (file.is_open()) {
+    if (file.is_open())
+    {
         string tp;
         int gamedID = 1;
 
-        string colours[3] = { "red", "green", "blue" };
+        string colours[3] = {"red", "green", "blue"};
 
-        while (getline(file, tp)) {
+        while (getline(file, tp))
+        {
             int gameStringIndex = tp.find(":");
 
-            if (gameStringIndex == -1) {
+            if (gameStringIndex == -1)
+            {
                 continue;
             }
 
@@ -36,7 +39,8 @@ int main()
 
             bool isAllowed = true;
 
-            while ((next = gameString.find(";", last)) != -1) {
+            while ((next = gameString.find(";", last)) != -1)
+            {
 
                 string subSetGame = gameString.substr(last, next - last) + ',';
                 last = next + 1;
@@ -48,20 +52,23 @@ int main()
                 int blue = 0;
                 int red = 0;
 
-                while ((subNext = subSetGame.find(",", subLast)) != -1) {
+                while ((subNext = subSetGame.find(",", subLast)) != -1)
+                {
 
                     string colour = subSetGame.substr(subLast, subNext - subLast);
                     subLast = subNext + 1;
 
                     int firstWhitespace = colour.find(" ");
 
-                    if (firstWhitespace == 0) {
+                    if (firstWhitespace == 0)
+                    {
                         colour = colour.substr(1);
                     }
 
                     int numberIndex = colour.find(" ");
 
-                    if (numberIndex == -1) {
+                    if (numberIndex == -1)
+                    {
                         continue;
                     }
 
@@ -69,31 +76,40 @@ int main()
 
                     int colourIndex = 0;
 
-                    for (int i = 0; i < 3; i++) {
+                    for (int i = 0; i < 3; i++)
+                    {
                         int position = colour.find(colours[i]);
 
-                        if (position != -1) {
+                        if (position != -1)
+                        {
                             colourIndex = i;
                             break;
                         }
                     }
 
-                    if (colourIndex == 0) {
+                    if (colourIndex == 0)
+                    {
                         red += stoi(number);
-                    } else if (colourIndex == 1) {
+                    }
+                    else if (colourIndex == 1)
+                    {
                         green += stoi(number);
-                    } else if (colourIndex == 2) {
+                    }
+                    else if (colourIndex == 2)
+                    {
                         blue += stoi(number);
                     }
                 }
 
-                if (!(red <= 12 && green <= 13 && blue <= 14)) {
+                if (!(red <= 12 && green <= 13 && blue <= 14))
+                {
                     isAllowed = false;
                     break;
                 }
             }
 
-            if (isAllowed) {
+            if (isAllowed)
+            {
                 total += gamedID;
             }
 

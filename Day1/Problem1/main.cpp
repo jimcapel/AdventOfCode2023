@@ -14,26 +14,34 @@ int main()
 
     int total = 0;
 
-    if (file.is_open()) {
+    if (file.is_open())
+    {
         string tp;
-        while (getline(file, tp)) {
+        while (getline(file, tp))
+        {
             int first = -1;
             int last = -1;
 
-            for (char ch : tp) {
+            for (char ch : tp)
+            {
 
                 int a = ch;
 
-                if (a >= 0x30 && a <= 0x39) {
-                    if (first == -1) {
+                if (a >= 0x30 && a <= 0x39)
+                {
+                    if (first == -1)
+                    {
                         first = a;
-                    } else {
+                    }
+                    else
+                    {
                         last = a;
                     }
                 }
             }
 
-            if (first == -1) {
+            if (first == -1)
+            {
                 break;
             }
 
@@ -41,9 +49,12 @@ int main()
 
             n += char(first);
 
-            if (last != -1) {
+            if (last != -1)
+            {
                 n += char(last);
-            } else {
+            }
+            else
+            {
                 n += char(first);
             }
 
