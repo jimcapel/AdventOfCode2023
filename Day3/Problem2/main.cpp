@@ -1,104 +1,140 @@
 #include <fstream>
+#include <vector>
 #include <iostream>
 #include <string>
 
 using namespace std;
 
-int getLineTotal(string *currentLine, string *previousLine, string *penultimateLine)
+struct Point
 {
-    int lineTotal = 0;
-    string number;
+    int x;
+    int y;
+};
 
-    bool symbol;
-
-    if (!(*previousLine).empty())
-    {
-        for (int i = 0; i < (*previousLine).length(); i++)
-        {
-            //  get ascii values for each char in all lines
-            char currentChar = (*currentLine)[i];
-            int currentCharAscii = int(currentChar);
-
-            char previousChar = (*previousLine)[i];
-            int previousCharAscii = int(previousChar);
-
-            char penultimateChar = (*penultimateLine)[i];
-            int penultimateCharAscii = int(penultimateChar);
-
-            //  get vars for if chars are a certain type
-            bool isPreviousCharNumber = previousCharAscii >= 0x30 && previousCharAscii <= 0x39;
-            bool isPreviousCharSymbol = (previousCharAscii < 0x30 || previousCharAscii > 0x39) && previousCharAscii != 0x2E & previousCharAscii != 0;
-
-            bool isCurrentCharSymbol = (currentCharAscii < 0x30 || currentCharAscii > 0x39) && currentCharAscii != 0x2E && currentCharAscii != 0;
-            bool isPenultimateCharSymbol = (penultimateCharAscii < 0x30 || penultimateCharAscii > 0x39) && penultimateCharAscii != 0x2E && penultimateCharAscii != 0;
-
-            bool symbolPresent = isPenultimateCharSymbol || isPreviousCharSymbol || isCurrentCharSymbol;
-
-            if (isPreviousCharNumber)
-            {
-                number += previousChar;
-            }
-
-            if (symbolPresent)
-            {
-                symbol = true;
-            }
-
-            //  if we are at the end of a number, check if that number should be added to total
-            if ((!isPreviousCharSymbol && !isPreviousCharNumber) || i == ((*currentLine).length() - 1) || isPreviousCharSymbol)
-            {
-                if (!number.empty() && symbol)
-                {
-                    std::cout << number << endl;
-                    lineTotal += stoi(number);
-                }
-
-                symbol = false;
-                number = "";
-            }
-
-            if (symbolPresent)
-            {
-                symbol = true;
-            }
-        }
-    }
-
-    *penultimateLine = *previousLine;
-    *previousLine = *currentLine;
-
-    return lineTotal;
-}
+struct PartNumber
+{
+    Point startIndex;
+    Point endIndex;
+    int value;
+};
 
 int main()
 {
     fstream file;
-    file.open("./inputTest.txt", ios::in);
+    file.open("../inputTest2.txt", ios::in);
 
     int total = 0;
+
+    vector<PartNumber> partNumbers;
+    vector<Point> symbols;
 
     if (file.is_open())
     {
         string current;
-        string previous;
-        string penultimate;
+        string number;
+
+        int lineNumber = 0;
 
         while (getline(file, current))
         {
-            int lineTotal = getLineTotal(&current, &previous, &penultimate);
+            Point start;
+            start.x = -1;
+            start.y = -1;
 
-            total += lineTotal;
-        }
+            Point end;
+            end.x = -1;
+            end.y = -1;
 
-        current = "";
+            Point symbol;
 
-        if (!previous.empty())
-        {
-            int lastLineTotal = getLineTotal(&current, &previous, &penultimate);
+            for (int i = 0; i < current.length(); i++)
+            {
+                int asciiValue = int(char(current[i]));
 
-            total += lastLineTotal;
+                if (asciiValue >= 0x30 && asciiValue <= 0x39)
+                {
+                    if (start.x == -1)
+                    {
+                        start.x = i;
+                        start.y = lineNumber;
+                    }
+
+                    number += char(asciiValue);
+                }
+                else if (((asciiValue < 0x30 || asciiValue > 0x39) || i == (current.length() - 1)) && !number.empty())
+                {
+
+                    end.x = i;
+                    end.y = lineNumber;
+
+                    PartNumber partNumber;
+
+                    partNumber.startIndex = start;
+                    partNumber.endIndex = end;
+                    partNumber.value = stoi(number);
+
+                    partNumbers.push_back(partNumber);
+
+                    number = "";
+                    start.x = -1;
+                    start.y = -1;
+                    end.x = -1;
+                    end.y = -1;
+                }
+                else if (asciiValue != 0x2E)
+                {
+                    //  we have a symbol
+                    symbol.x = i;
+                    symbol.y = lineNumber;
+
+                    symbols.push_back(symbol);
+                }
+            }
+
+            lineNumber++;
         }
     }
+
+    // for (PartNumber x : partNumbers)
+    // {
+    //     cout << x.value << " start: (" << x.startIndex.x << ", " << x.startIndex.y << ") end: (" << x.endIndex.x << ", " << x.endIndex.y << ")" << endl;
+    // }
+
+    // for (Point symbol : symbols)
+    // {
+    //     cout << "(" << symbol.x << " , " << symbol.y << ")" << endl;
+    // }
+
+    // iterate through symbols
+    for (Point symbol : symbols)
+    {
+        int adjacentCount = 0;
+        int gearRatio = 1;
+
+        //  iterate through parts
+        for (PartNumber partNumber : partNumbers)
+        {
+            // is part within vertical bounds
+            if (partNumber.startIndex.y <= symbol.y + 1 && partNumber.startIndex.y >= symbol.y - 1)
+            {
+                //  is part within horizontal bounds
+
+                if (symbol.x >= partNumber.startIndex.x - 1 && symbol.x <= partNumber.endIndex.x)
+                {
+                    cout << partNumber.value << " " << adjacentCount << endl;
+
+                    gearRatio = gearRatio * partNumber.value;
+                    adjacentCount += 1;
+                }
+            }
+        }
+
+        if (adjacentCount == 2)
+        {
+            total += gearRatio;
+        }
+    }
+
     file.close();
 
     std::cout << total << endl;
